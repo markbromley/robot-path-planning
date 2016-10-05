@@ -127,7 +127,12 @@ if __name__ == "__main__":
 
 
     im = PIL.Image.open("map.png")
+    im_orig = im.convert('RGB')
     im = im.convert('1')
     im = im.resize((200, 200), PIL.Image.ANTIALIAS)
     pixels = list(im.getdata())
     im.show()
+    display_image = np.array(im_orig)
+    display_image[30:40] = (255, 0, 0)
+    im2 = Image.fromarray(display_image)
+    im2.show()
