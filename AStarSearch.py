@@ -58,11 +58,9 @@ if __name__ == "__main__":
         dist[source] = 0
         q = verts.copy()
         neighbours = {vertex: set() for vertex in verts}
-        print "HERE  1"
         for start, end, cost in edges:
             neighbours[start].add((end, cost))
         #pp(neighbours)
-        print "2"
  
         while q:
             u = min(q, key=lambda vertex: dist[vertex])
@@ -75,7 +73,6 @@ if __name__ == "__main__":
                     dist[v] = alt
                     previous[v] = u
         #pp(previous)
-        print "3"
         s, u = deque(), dest
         while previous[u]:
             s.appendleft(u)
@@ -129,7 +126,7 @@ if __name__ == "__main__":
     # print find_path(graph, 'A', 'F')
 
 
-    im = PIL.Image.open("mark_maze_3.png")
+    im = PIL.Image.open("mark_maze_2.png")
     im_orig = im.convert('RGB')
     #im = im.convert('1')
     # im = im.resize((100, 100), PIL.Image.ANTIALIAS)
@@ -140,6 +137,7 @@ if __name__ == "__main__":
     #HERE
     # Create the graph - find the 8- wise connected components - check fringes
     graph = []
+    considered_nodes = [] # optimisation
     image_arr = np.array(im)
     for row, val in enumerate(image_arr):
         for col, val2 in enumerate(val):
@@ -153,10 +151,11 @@ if __name__ == "__main__":
             # h_coord = (row+1, col+1)
             white_col = False
             #white_col = np.array([255,255,255])
-            print(image_arr[row,col])
+            #print(image_arr[row,col])
             if np.array_equal(image_arr[row, col], white_col):
-                print("White for {}, {}").format(row,col)
+                #print("White for {}, {}").format(row,col)
                 node_name = str(row) + "," + str(col)
+                considered_nodes.append(node_name)
                 for x_i in range(row-1, row+2):
                     for y_i in range(col-1, col+2):
                         if (x_i, y_i) != (row, col):
@@ -165,33 +164,35 @@ if __name__ == "__main__":
                             # print(x_i, y_i)
                             # print(image_arr.shape[1])
                             if(x_i >= 0 and x_i < image_arr.shape[1] and 
-                               y_i >= 0 and y_i < image_arr.shape[0]): # Are these correct way round [0]?
+                               y_i >= 0 and y_i < image_arr.shape[0] and # Are these correct way round [0]?
+                               ((x_i != row and y_i == col) or (x_i == row and y_i != col))): # Make sure 4-connected not 8-connected
                                 if np.array_equal(image_arr[x_i, y_i], white_col):
                                     inner_node_name = str(x_i) + "," + str(y_i)
-                                    graph.append((node_name, inner_node_name, 1)) 
+                                    if inner_node_name not in considered_nodes:
+                                        graph.append((node_name, inner_node_name, 1)) 
                         # print("White")
                     #print("Node Name: {}").format(node_name)
                 #     break
                 # break
             elif np.array_equal(image_arr[row, col], np.array([0, 0, 0])):
                 pass
-            if row == 0 and col == 0:
-                print "stop:..."
+            # if row == 0 and col == 0:
+                # print "stop:..."
             #a = raw_input()
 
-    print graph
+    # print graph
     graph = Graph(graph)
     # TO HERE
 
     display_image = np.array(im_orig)
     result = dijkstra(graph.vertices, graph.edges, "0,0", "149,149")
-    print "\n\n\n RESULT"
-    print result
+    # print "\n\n\n RESULT"
+    # print result
     for node in result:
         print node
         x,y = node.split(",")
-        print x
-        print y 
+        # print x
+        # print y 
         x = int(x)
         y =  int(y)
         print("X, Y: {}, {}").format(x,y)
