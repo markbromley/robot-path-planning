@@ -58,9 +58,11 @@ if __name__ == "__main__":
         dist[source] = 0
         q = verts.copy()
         neighbours = {vertex: set() for vertex in verts}
+        print "HERE  1"
         for start, end, cost in edges:
             neighbours[start].add((end, cost))
         #pp(neighbours)
+        print "2"
  
         while q:
             u = min(q, key=lambda vertex: dist[vertex])
@@ -73,6 +75,7 @@ if __name__ == "__main__":
                     dist[v] = alt
                     previous[v] = u
         #pp(previous)
+        print "3"
         s, u = deque(), dest
         while previous[u]:
             s.appendleft(u)
@@ -96,8 +99,8 @@ if __name__ == "__main__":
                'E' : [9, 1],
                'F' : [4, 1]}
 
-    graph = Graph([("a", "b", 1),  ("b", "c", 2)])
-    print(dijkstra(graph.vertices, graph.edges, "a", "c"))
+    #graph = Graph([("a", "b", 1),  ("b", "c", 2)])
+
 
     #print dijkstra(connections, weights, 'A', 'F')
 
@@ -126,19 +129,21 @@ if __name__ == "__main__":
     # print find_path(graph, 'A', 'F')
 
 
-    im = PIL.Image.open("map.png")
+    im = PIL.Image.open("mark_maze_3.png")
     im_orig = im.convert('RGB')
-    im = im.convert('1')
-    #im = im.resize((200, 200), PIL.Image.ANTIALIAS)
+    #im = im.convert('1')
+    # im = im.resize((100, 100), PIL.Image.ANTIALIAS)
+    # im_orig = im_orig.resize((100, 100), PIL.Image.ANTIALIAS)
     # pixels = list(im.getdata())
     # im.show()
 
+    #HERE
     # Create the graph - find the 8- wise connected components - check fringes
     graph = []
-    image_arr = np.array(im_orig)
+    image_arr = np.array(im)
     for row, val in enumerate(image_arr):
         for col, val2 in enumerate(val):
-            
+
             # |-------|
             # |a  b  c|
             # |d  *  e|
@@ -146,31 +151,52 @@ if __name__ == "__main__":
             # |-------|
             # a_coord = (row-1, col-1)
             # h_coord = (row+1, col+1)
-
-            for x_i in range(row-1, row+2):
-                for y_i in range(col-1, col+2):
-                    if (x_i, y_i) != (row, col):
-                        # Check if they hit the edges
-                        # Check if they're connected and add to graph
-                        print(x_i, y_i)
-
-            if np.array_equal(image_arr[row, col], np.array([255, 255, 255])):
-                print("White")
+            white_col = False
+            #white_col = np.array([255,255,255])
+            print(image_arr[row,col])
+            if np.array_equal(image_arr[row, col], white_col):
+                print("White for {}, {}").format(row,col)
+                node_name = str(row) + "," + str(col)
+                for x_i in range(row-1, row+2):
+                    for y_i in range(col-1, col+2):
+                        if (x_i, y_i) != (row, col):
+                            # Check if they hit the edges
+                            # Check if they're connected and add to graph
+                            # print(x_i, y_i)
+                            # print(image_arr.shape[1])
+                            if(x_i >= 0 and x_i < image_arr.shape[1] and 
+                               y_i >= 0 and y_i < image_arr.shape[0]): # Are these correct way round [0]?
+                                if np.array_equal(image_arr[x_i, y_i], white_col):
+                                    inner_node_name = str(x_i) + "," + str(y_i)
+                                    graph.append((node_name, inner_node_name, 1)) 
+                        # print("White")
+                    #print("Node Name: {}").format(node_name)
+                #     break
+                # break
             elif np.array_equal(image_arr[row, col], np.array([0, 0, 0])):
-                print("Black")
+                pass
+            if row == 0 and col == 0:
+                print "stop:..."
+            #a = raw_input()
 
-            node_name = str(row) + str(col)
-            print("Node Name: {}").format(node_name)
-            node = node_name
-            graph.append(node)
-            break
-        break
-
-
-
-
+    print graph
+    graph = Graph(graph)
+    # TO HERE
 
     display_image = np.array(im_orig)
-    display_image[30:40] = (255, 0, 0)
+    result = dijkstra(graph.vertices, graph.edges, "0,0", "149,149")
+    print "\n\n\n RESULT"
+    print result
+    for node in result:
+        print node
+        x,y = node.split(",")
+        print x
+        print y 
+        x = int(x)
+        y =  int(y)
+        print("X, Y: {}, {}").format(x,y)
+        display_image[x,y] = (255, 0, 0)
+    
     im2 = Image.fromarray(display_image)
+    im2.save("test.png")
     im2.show()
