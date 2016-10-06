@@ -129,9 +129,47 @@ if __name__ == "__main__":
     im = PIL.Image.open("map.png")
     im_orig = im.convert('RGB')
     im = im.convert('1')
-    im = im.resize((200, 200), PIL.Image.ANTIALIAS)
-    pixels = list(im.getdata())
-    im.show()
+    #im = im.resize((200, 200), PIL.Image.ANTIALIAS)
+    # pixels = list(im.getdata())
+    # im.show()
+
+    # Create the graph - find the 8- wise connected components - check fringes
+    graph = []
+    image_arr = np.array(im_orig)
+    for row, val in enumerate(image_arr):
+        for col, val2 in enumerate(val):
+            
+            # |-------|
+            # |a  b  c|
+            # |d  *  e|
+            # |f  g  h|
+            # |-------|
+            # a_coord = (row-1, col-1)
+            # h_coord = (row+1, col+1)
+
+            for x_i in range(row-1, row+2):
+                for y_i in range(col-1, col+2):
+                    if (x_i, y_i) != (row, col):
+                        # Check if they hit the edges
+                        # Check if they're connected and add to graph
+                        print(x_i, y_i)
+
+            if np.array_equal(image_arr[row, col], np.array([255, 255, 255])):
+                print("White")
+            elif np.array_equal(image_arr[row, col], np.array([0, 0, 0])):
+                print("Black")
+
+            node_name = str(row) + str(col)
+            print("Node Name: {}").format(node_name)
+            node = node_name
+            graph.append(node)
+            break
+        break
+
+
+
+
+
     display_image = np.array(im_orig)
     display_image[30:40] = (255, 0, 0)
     im2 = Image.fromarray(display_image)
